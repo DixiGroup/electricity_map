@@ -22,6 +22,8 @@ library(shinyWidgets)
 library(scales)
 library(stringr)
 
+options(shiny.maxRequestSize=30*1024^2)
+
 # Define UI for data upload app ----
 ui <- fluidPage(
     
@@ -72,7 +74,13 @@ ui <- fluidPage(
                           textInput("customsubtitle", label = "Підзаголовок у файлі")),
                    
                    column(2,
-                          disabled(downloadButton('downloadData', 'Завантажити мапу')))))
+                          disabled(downloadButton('downloadData', 'Завантажити')))),
+               fluidRow(tags$hr(),
+                   column(12, 
+                          img(src = "./dixilogo_small.png"))),
+               fluidRow(column(12, 
+                               helpText("Виконання цього інструменту стало можливим завдяки підтримці американського народу, наданій через Агентство США з міжнародного розвитку (USAID). Думки, викладені в цьому інструменті, є виключною відповідальністю DiXi Group і за жодних обставин не можуть розглядатися як такі, що відображають позицію USAID чи Уряду США.")))
+           )
            
     )
 )
@@ -157,6 +165,7 @@ server <- function(session, input, output) {
                     dplyr::left_join(regions, by = c("oblast" = "region"))  %>% 
                     dplyr::rename(region = oblast) %>% 
                     dplyr::mutate(region = UA_NAME)
+                print(sort( sapply(ls(),function(x){object.size(get(x))})) )
                 #print(debt)
                 categories <<- debt %>% 
                     dplyr::select(consumer_cat, consumer_type) %>% 
@@ -284,7 +293,7 @@ server <- function(session, input, output) {
                 #   paste(r, "–", billions, "")
                 # }, ukr_df$debt_total, ukr_df$UA_NAME)
                 subtitle <- paste0("Дані станом на ", 
-                                   second_date_string, ". Відсотки відображають зміну з ", date1_gen, ".\nЗавантажити дані: https://data.gov.ua/dataset/75140072-160d-4f87-ac08-a75a1d3557e8")
+                                   second_date_string, ". Відсотки відображають зміну з ", date1_gen, ".\nЗавантажити дані: https://data.gov.ua/dataset/af62767b-95b7-4d47-a941-0dc00a9213e6")
                 ukr_df$total <- factor(as.character(ukr_df$total), 
                                             levels = as.character(unique(ukr_df$total)), ordered = TRUE)
                 legend_labels <- factor(unique(ukr_df$label), levels = unique(ukr_df$label), ordered = TRUE)
@@ -367,7 +376,7 @@ server <- function(session, input, output) {
                 
                 #debt_last <- dplyr::filter(debt, date == max(date))
                 subtitle <- paste0('Зміни з ', 
-                                   date1_gen, " до ", date2_gen, ".\nЗавантажити дані: https://data.gov.ua/dataset/75140072-160d-4f87-ac08-a75a1d3557e8")
+                                   date1_gen, " до ", date2_gen, ".\nЗавантажити дані: https://data.gov.ua/dataset/af62767b-95b7-4d47-a941-0dc00a9213e6")
                 pr_br <- pretty(debt$total, n = 5)
                 debt$date <- as.Date(paste("2001", debt$month, "01"), format = "%Y %m %d")
                 pl <<- ggplot(debt, aes(x = date, y = total, col = year)) +
@@ -480,7 +489,7 @@ server <- function(session, input, output) {
                                                  levels = as.character(unique(changes_df$changes)), ordered = TRUE)
                     changes_labels <- factor(unique(changes_df$label), levels = unique(changes_df$label), ordered = TRUE)
                     subtitle <- paste0(params$caption, 
-                                       ".\nЗавантажити дані: https://data.gov.ua/dataset/75140072-160d-4f87-ac08-a75a1d3557e8")
+                                       ".\nЗавантажити дані: https://data.gov.ua/dataset/af62767b-95b7-4d47-a941-0dc00a9213e6")
                     pl <<- ggplot(changes_df, aes(x = long, y= lat, group = group, fill = changes)) + 
                         #ggtitle(ifelse(length(cats) > 0, paste(params$title, paste(cats, collapse = ", "), sep = " - "), params$title)) +
                         ggtitle(params$title, subtitle = capitalize(paste(cats, collapse = ", "))) +
@@ -559,7 +568,7 @@ server <- function(session, input, output) {
                                                                   format(round(billions[abs(billions) > 1],1), trim = TRUE, big.mark = " "), "млрд")
                         ukr_df$label <- number_string
                         subtitle <- paste0("Дані станом на ", 
-                                           second_date_string, ".", ".\nЗавантажити дані: https://data.gov.ua/dataset/75140072-160d-4f87-ac08-a75a1d3557e8")
+                                           second_date_string, ".", ".\nЗавантажити дані: https://data.gov.ua/dataset/af62767b-95b7-4d47-a941-0dc00a9213e6")
                         ukr_df$total <- factor(as.character(ukr_df$total), 
                                                     levels = as.character(unique(ukr_df$total)), ordered = TRUE)
                         legend_labels <- factor(unique(ukr_df$label), levels = unique(ukr_df$label), ordered = TRUE)
